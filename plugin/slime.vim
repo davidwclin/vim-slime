@@ -12,17 +12,22 @@ if !exists("g:slime_target")
   let g:slime_target = "screen"
 end
 
+	
+if !exists("g:slime_paste_file")
+  let g:slime_paste_file = "/tmp/.slime_paste"
+end
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Screen
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 function! s:ScreenSend(config, text)
-  let escaped_text = substitute(shellescape(a:text), "\\\\\\n", "\n", "g")
   let buffer_size = 64
   let i = 0
-  while i < len(escaped_text)
-    let text_buffer = strpart(escaped_text, i, buffer_size)
-    call system("screen -S " . shellescape(a:config["sessionname"]) . " -p " . shellescape(a:config["windowname"]) . " -X stuff " . string(text_buffer))
+  while i < len(a:text)
+    let text_buffer = strpart(a:text, i, buffer_size)
+    let text_buffer = substitute(shellescape(text_buffer), "\\\\\\n", "\n", "g")
+    call system("screen -S " . shellescape(a:config["sessionname"]) . " -p " . shellescape(a:config["windowname"]) . " -X stuff " . text_buffer)
     let i += buffer_size
   endwhile
 endfunction
@@ -33,7 +38,7 @@ endfunction
 
 function! s:ScreenConfig() abort
   if !exists("b:slime_config")
-    let b:slime_config = {"sessionname": "", "windowname": "0"}
+    let b:slime_config = {"sessionname": "clojure", "windowname": "0"}
   end
 
   let b:slime_config["sessionname"] = input("screen session name: ", b:slime_config["sessionname"], "custom,<SNR>" . s:SID() . "_ScreenSessionNames")
